@@ -13,8 +13,9 @@ public:
     double Integrate_velocity();
     double Print_velocity();
     double Energy_Calculation();
-
+ double Energy_Calculation345345();
 private:
+    Model*m
     //Numerical
     double x0;
     double y0;
@@ -53,7 +54,7 @@ private:
 
 };
 
-Burgers::Burgers(Model* m)
+Burgers::Burgers(Model* m_) : m(m_)
 {
     // taking in all the inputs
     ax = m->GetAx();
@@ -80,19 +81,7 @@ Burgers::Burgers(Model* m)
 
 }
 void Burgers::Initial_velocity(){
-    double uArray[Nx][Ny];
-    double unArray[Nx][Ny];
-    double vArray[Nx][Ny];
-    double vnArray[Nx][Ny];
-    double rhsxArray[Nx][Ny];
-    double rhsyArray[Nx][Ny];
-    double xArray[Nx][Ny];
-    double x[Nx];
-    double y[Ny];
-    double u[Nx][Ny];
-    double v[Nx][Ny];
-    double un[Nx][Ny];
-    double vn[Nx][Ny];
+
 
 
 x[0]=-L/2;

@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Jinay Patel
-Date                   :=27/02/19
+Date                   :=13/03/19
 CodeLitePath           :=/home/jp1916/.codelite
 LinkerName             :=/usr/bin/g++
 SharedObjectLinkerName :=/usr/bin/g++ -shared -fPIC
@@ -60,7 +60,7 @@ AS       := /usr/bin/as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/burgers.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/matlabcode.cpp$(ObjectSuffix) $(IntermediateDirectory)/Burgers.cpp$(ObjectSuffix) $(IntermediateDirectory)/Model.cpp$(ObjectSuffix) 
 
 
 
@@ -91,13 +91,29 @@ PreBuild:
 ##
 ## Objects
 ##
-$(IntermediateDirectory)/burgers.cpp$(ObjectSuffix): burgers.cpp $(IntermediateDirectory)/burgers.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/jp1916/HPC_Coursework/HPC_Coursework/burgers.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/burgers.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/burgers.cpp$(DependSuffix): burgers.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/burgers.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/burgers.cpp$(DependSuffix) -MM burgers.cpp
+$(IntermediateDirectory)/matlabcode.cpp$(ObjectSuffix): matlabcode.cpp $(IntermediateDirectory)/matlabcode.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/jp1916/HPC_Coursework/HPC_Coursework/matlabcode.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/matlabcode.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/matlabcode.cpp$(DependSuffix): matlabcode.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/matlabcode.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/matlabcode.cpp$(DependSuffix) -MM matlabcode.cpp
 
-$(IntermediateDirectory)/burgers.cpp$(PreprocessSuffix): burgers.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/burgers.cpp$(PreprocessSuffix) burgers.cpp
+$(IntermediateDirectory)/matlabcode.cpp$(PreprocessSuffix): matlabcode.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/matlabcode.cpp$(PreprocessSuffix) matlabcode.cpp
+
+$(IntermediateDirectory)/Burgers.cpp$(ObjectSuffix): Burgers.cpp $(IntermediateDirectory)/Burgers.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/jp1916/HPC_Coursework/HPC_Coursework/Burgers.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Burgers.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/Burgers.cpp$(DependSuffix): Burgers.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/Burgers.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/Burgers.cpp$(DependSuffix) -MM Burgers.cpp
+
+$(IntermediateDirectory)/Burgers.cpp$(PreprocessSuffix): Burgers.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/Burgers.cpp$(PreprocessSuffix) Burgers.cpp
+
+$(IntermediateDirectory)/Model.cpp$(ObjectSuffix): Model.cpp $(IntermediateDirectory)/Model.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/jp1916/HPC_Coursework/HPC_Coursework/Model.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/Model.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/Model.cpp$(DependSuffix): Model.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/Model.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/Model.cpp$(DependSuffix) -MM Model.cpp
+
+$(IntermediateDirectory)/Model.cpp$(PreprocessSuffix): Model.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/Model.cpp$(PreprocessSuffix) Model.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

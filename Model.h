@@ -1,30 +1,18 @@
 #ifndef CLASS_MODEL
 #define CLASS_MODEL
 
-//#include "mpi.h"
+#include <regex>
 #include <iostream>
+#include <fstream>
+//#include <mpi.h>
 using namespace std;
 
 class Model {
 	public:
-            Model(int argc, char* argv[])
-            {
-
-                for(int i = 0; i < argc; i++) {
-                    if(string(argv[i]) == "-h") {
-                        DispHelp();
-                        help = true;
-                    }
-                    if(string(argv[i]) == "-v") {
-                        PrintParameters();
-                        verbose = true;
-                    }
-                }
-
-                ParseParameters(argc, argv);
-            }
-
-            //~Model();
+            Model(int argc, char* argv[]);
+            ~Model(){};
+            
+           
 
         // Getters
         bool IsVerbose() const{ return verbose; }
@@ -32,8 +20,8 @@ class Model {
         double GetX0()     const { return x0; }
         double GetY0()     const { return y0; }
         double GetL()       const {return L; }
-        double GetLx()     const { return Lx; }
-        double GetLy()     const { return Ly; }
+        //double GetLx()     const { return Lx; }
+        //double GetLy()     const { return Ly; }
         double GetT()      const { return T; }
         int    GetNx()     const { return Nx; }
         int    GetNy()     const { return Ny; }
@@ -51,55 +39,22 @@ class Model {
 private:
     
     // Insert parameters here..
-    void ParseParameters(int argc, char* argv[])
-    {
-        if(argc != 6 && argc != 5) {
-            cout << " Please refer to the *HELP* section below" << endl;
-            DispHelp();
-        }
+    void ParseParameters(int argc, char* argv[]);
 
-        ax = stod(argv[1]);
-        ay = stod(argv[2]);
-        b = stod(argv[3]);
-        c = stod(argv[4]);
-        L = 10;
-        Lx = 10;
-        Ly = 10;
-        T = 0;
-    }
 
     bool verbose;
     bool help;
 
     // Prints the parameter list if the user calls for it
-    void PrintParameters()
-    {
-        cout << "Physics constants: ax, ay, b, c" << endl;
-        cout << "Numerical constants: x0, y0, Lx, Ly, T, Nx, Ny, Nt, dx, dy, dt" << endl;
-    }
+    void PrintParameters();
+    // Calculates the rest of the 'D' parameters
+    void FillInput();
 
     // Displays a help menu if the wrong number of inputs are entered or the user calls for aid
-    void DispHelp()
-    {
-        cout << "HELP" << endl;
-        cout << " if you would like help, please enter '-h' as the final input" << endl;
-        cout << " if you would to know the parameter list, please enter '-v' as the final input" << endl;
-        cout << " this program does blah blah" << endl;
-        cout << " the following parameters are required" << endl;
-        cout << " ax = constant" << endl;
-        cout << " ay = constant" << endl;
-        cout << " b = constant" << endl;
-        cout << " c = constant" << endl;
-        }
+    void DispHelp();
 
-//        void ValidateParameters(argv);
-//        for (int i = 0; i<4;i++ )
-//        if(isalpha(argv[i]) == true) {
-//            bool valid = false;
-//            return valid
-//        }
 
-        bool IsValid(); // returns true or false. true if all parameters are valid
+    void IsValid(int argc, char* argv[]);
 
         // Numerics
         double x0;

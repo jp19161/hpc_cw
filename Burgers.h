@@ -1,73 +1,58 @@
-#ifndef Burgers_h
-#define Burgers_h
+#ifndef CLASS_BURGERS
+#define CLASS_BURGERS
 #include <cmath>
+#include "Model.h"
 using namespace std;
-class Burgers
-{
-public:
-    Burgers(Model* m);
 
-    // Initial_velocity()
-    // I
-    // cout<<"ax = "<<ax<<endl;
+class Burgers{
+    
+public:
+    Burgers(Model& m);
+    ~Burgers(){};
+
     void Initial_velocity();
     void Integrate_velocity();
     void Print_velocity();
     void Energy_Calculation();
+    
 private:
-    Model* m
-    double* x, y u, v;
-    int rows, cols;
+// parameters will go here
+// call to functoins also 
+    Model* m;
+ 
 
+        // Numerics
+        double x0;
+        double y0;
+        double L;
+        double Lx;
+        double Ly;
+        double T ;
+        int Nx ;
+        int Ny ;
+        int Nt ;
+        double dx;
+        double dy;
+        double dt;
+
+        // Physics
+        double ax;
+        double ay;
+        double b;
+        double c;
+        
+        // Parameters needed by burgers.cpp functions 
+       double *u;
+       double *v;
+       double *u_new;
+       double *v_new;
+       double u_next;
+       double v_next;
+       double *x;
+       double *y;
 };
 
-Burgers::Burgers(Model* m_) : m(m_)
-{
-    rows = m->getNy();
-    cols  =  m->getNx();
-    double arr_size = rows * cols;
-    u = new double[arr_size];
-    v = new double[arr_size];
-
-    x = new double[cols];
-    y = new double[rows];
-    double L = m->getLx());
-    double dx = m->getDx();
-    double dy = m->getDy();
-    for(int i = 0; i < cols; ++i) {
-        x[i] = i*dx - L / 2.0;
-    }
-    for(int i = 0; i < rows; ++i) {
-        y[i] = i*dy - L / 2.0;
-    }
-}
 
 
-void Burgers::Initial_velocity(){
-    // Initial Conditions
-    double r;
-    for  (int i = 0; i < cols; i++){
-        for  (int j = 0; j < rows; j++){
-            r = sqrt(pow(x[i],2)+pow(y[j],2));
-            v[i*rows+j] = u[i*rows+j] = (r<1? 2*pow((1-r),4)*((4*r+1)): 0)
-        }
-    }
-}
-
-
-
-
-void Integrate_velocity()
-{
-    
-}
-
-void Print_velocity()
-{
-}
-
-void Energy_Calculation()
-{
-}
 
 #endif /* Burgers_h */

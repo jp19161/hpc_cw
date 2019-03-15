@@ -11,9 +11,6 @@ class Model {
 	public:
             Model(int argc, char* argv[]);
             ~Model(){};
-            
-           
-
         // Getters
         bool IsVerbose() const{ return verbose; }
         bool   IsHelp()    const { return help; }
@@ -33,6 +30,10 @@ class Model {
         double GetAy()     const { return ay; }
         double GetB()      const { return b; }
         double GetC()      const { return c; }
+        int GetPx()      const { return px; }
+        int GetPy()      const { return py; }
+
+        
 
         // Add any other getters here...
 
@@ -40,7 +41,6 @@ private:
     
     // Insert parameters here..
     void ParseParameters(int argc, char* argv[]);
-
 
     bool verbose;
     bool help;
@@ -52,7 +52,6 @@ private:
 
     // Displays a help menu if the wrong number of inputs are entered or the user calls for aid
     void DispHelp();
-
 
     void IsValid(int argc, char* argv[]);
 
@@ -69,6 +68,8 @@ private:
         double dx;
         double dy;
         double dt;
+        int px;
+        int py;
 
         // Physics
         double ax;
@@ -77,7 +78,6 @@ private:
         double c;
 
         // Add any additional parameters here...
-
 };
 
 #endif  

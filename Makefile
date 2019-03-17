@@ -10,13 +10,13 @@ Burgers.o: Burgers.cpp Burgers.h Model.h
 	mpicxx -std=c++11 -Wall -o Burgers.o -c Burgers.cpp
 
 compile: main.o  Model.o Burgers.o
-	mpicxx -o HPC_Prog main.o  Model.o Burgers.o
+	mpicxx -o HPC_Prog main.o  Model.o Burgers.o 
 
 .PHONY: clean # Specify that ’clean’ is not a real file
-	target
+	target 
 
 diff: compile
-	mpiexec -np 3 HPC_Prog 0 0 0 1 10.0 21 21 4000 1.0 1 3
+	mpiexec -np 4 HPC_Prog 0 0 0 1 10.0 21 21 4000 1.0 2 2
 
 advx: compile
 	mpiexec -np 6 HPC_Prog 1 0 0 0 10.0 21 21 4000 1.0
@@ -32,5 +32,5 @@ clean:
 
 all: diff advx advy burg clean
 
-# T L Nx Ny Nt Ax Ay b c  
 # ax ay b c L Nx Ny Nt T px py
+# -O3 -ffast-math -funroll-loops  -march=native -ftree-vectorize

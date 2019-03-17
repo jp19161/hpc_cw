@@ -39,21 +39,37 @@ Burgers::Burgers(Model& m)
 
 Burgers::~Burgers()
 {
-    
-        delete[]  u;
-        delete[]  v;
+    // deleteing all the paointed to variables
+//        delete[]  u;
+//        delete[]  v;
 //        delete[]  u_new;
 //        delete[]  v_new; 
-        delete[]  x;
-        delete[]  y;
-        delete[]  width_process_u;
-        delete[]  height_process_u;
-//        delete[]  local_u;
+//        delete[]  x;
+//        delete[]  y;
+//        delete[]  width_process_u;
+//        delete[]  height_process_u;
+//        delete[] width_process_v;
+//        delete[] height_process_v;
+//        delete[]  outer_left_u;
+//        delete[] outer_right_u;
+//        delete[] inner_left_u;
+//        delete[] inner_right_u;
+//        delete[] inner_down_u;
+//        delete[] inner_up_u;
+//        delete[] outer_down_u;
+//        delete[] outer_up_u;
+//        delete[] local_u;
 //        delete[]  local_v;
 //        delete[]  local_x;
 //        delete[]  local_y;
 //        delete[]  local_u_new;
 //        delete[]  local_v_new;
+//        delete[] BigU;
+//        delete[] BigV;
+//        delete[] bigu;
+//        delete[] bigv;
+     
+        
 }
 
 // Initialise velocity
@@ -109,11 +125,7 @@ for(int i=0; i <mpirows; i++){
     cout << "my y position: " << my_pos_y << endl;
 
 
-// MPI references
-// send
-// int MPI_Send(void *buf, int cnt, MPI_Datatype type, int dest, int tag, MPI_Comm comm);
-// recieve
-// int MPI_Recv(void *buf, int cnt, MPI_Datatype type, int src,int tag, MPI_Comm comm, MPI_Status *stat);
+
 
 
 // Actually doing the MPI stuff hah
@@ -122,6 +134,12 @@ local_u = new double[local_nx * local_ny];
 local_v = new double[local_nx * local_ny];
 local_x = new double[local_nx];
 local_y = new double[local_ny];
+/*Left_B = new double 
+Right_B
+Upper_B
+Lower_B*/
+
+
 //    double r, rb;
 //    u = new double[Nx * Ny];
 //    v = new double[Nx * Ny];
@@ -150,6 +168,34 @@ local_y = new double[local_ny];
             local_v[row* local_nx + col] = rb;
         }
     }
+    
+    
+    inner_left_u = new double[local_ny];
+    inner_right_u = new double[local_ny];
+    outer_left_u = new double[local_ny];
+    outer_right_u = new double[local_ny];
+    inner_up_u = new double[local_nx];
+    inner_down_u = new double[local_nx];
+    outer_up_u = new double[local_nx];
+    outer_down_u = new double [local_nx];
+
+    for (int row =0;row<local_ny;row++)
+    {
+        inner_left_u[row]=local_u[row*local_nx]; //first element of the top is local u [local_ny*local_nx-local_nx]
+        // do v
+        inner_right_u[row]=local_u[row*local_nx+local_nx-1];
+        // do v
+    }
+    //different loop for top bottom
+    for (int col =0;col<local_nx; col++)
+    {
+        inner_up_u[col]=local_u[col*local_ny]; //first element of the top is local u [local_ny*local_nx-local_nx]
+        // do v
+        inner_down_u[col]=local_u[0];
+        // do v
+    }
+    
+    
     MPI_Barrier(MPI_COMM_WORLD);
     if (myrank==2)
     for(int row = local_ny-1; row >=0; --row) {
@@ -183,50 +229,6 @@ double full_grid_y;
 
 
 }*/
-
-// Integrate Velocity
-void Burgers::Integrate_velocity()
-{
-    //cout << "sup1 " << endl;
-    local_u_new = new double[local_nx * local_ny];
-    local_v_new = new double[local_nx * local_ny];
-    // auto* u_next = new double[Nx * Ny];
-    // auto* v_next = 0new double[Nx * Ny];
-    const double c1 = c / dx / dx + ax / dx;
-    const double c2 = c / dx / dx;
-    const double c3 = -2.0 * c * (1 / dx / dx + 1 / dy / dy) - ax / dx - ay / dy + 1 / dt;
-    const double c4 = c / dy / dy + ay / dy;
-    const double c5 = c / dy / dy;
-    //cout << "sup2 " << endl;
-        for(int i = 1; i < local_nx - 1; i++) {
-            for(int j = 1; j < local_ny - 1; j++) {
-                local_u_next = c1 * u[(i - 1) * local_ny + j] + c2 * u[(i + 1) * local_ny + j] + c3 * u[i * local_ny + j] + c4 * u[i * local_ny + j - 1] + c5 * u[i * local_ny + j + 1] +b / dx * u[i * local_ny + j] * (-u[i * local_ny + j] + u[(i - 1) * local_ny + j]) +  b / dy * v[i * local_ny + j] * (u[i * local_ny + j - 1] - u[i * local_ny + j]);
-                local_v_next = c1 * v[(i - 1) * local_ny + j] + c2 * v[(i + 1) * local_ny + j] + c3 * v[i * local_ny + j] +  c4 * v[i * local_ny + j - 1] + c5 * v[i * local_ny + j + 1] + b / dx * v[i * local_ny + j] * (-v[i * local_ny + j] + v[(i - 1) * local_ny + j]) +  b / dy * u[i * local_ny + j] * (v[i * local_ny + j - 1] - v[i * local_ny + j]);
-                //cout << "sup 3" << endl;
-                local_u_new[i * local_ny + j] = dt * local_u_next;
-                local_v_new[i * local_ny + j] = dt * local_v_next;
-            }
-        }
-        // Reassigning values to the velocity arrays
-        for(int in = 1; in < local_nx - 1; in++) {
-            for(int jn = 1; jn < local_ny - 1; jn++) {
-                local_u[in * local_ny + jn] = local_u_new[in * local_ny + jn];
-                local_v[in * local_ny + jn] = local_v_new[in * local_ny + jn];
-            }
-        }
-}
-
-//writing velocity field to file 
-
-void Burgers::Energy_Calculation()
-{
-    double energy;
-    for(int i = 0; i < Nx * Ny; i++) {
-        energy += (pow(u[i],2) + pow(v[i],2));
-    }
-    energy *= 0.5 * dx * dy;
-    cout << energy << endl;
-}
 
 /*Patching U field by first patching the fields onto the proceses on the leftmost column
  * and then by patchig the wide fields onto process 0 at the bottom
@@ -265,7 +267,7 @@ void Burgers::PatchUpU()
         for (int j=0;j<local_ny;j++)
             MPI_Send(&local_u[j*local_nx],local_nx,MPI_DOUBLE,myrank-mpicols,mpicols,MPI_COMM_WORLD);
     }
-    //cout<<"Done column merging"<<endl;
+    cout<<"my rank" << myrank <<"Done column merging"<<endl;
     //Patching the wide field onto process 0
     if (mpicols==0)
     {
@@ -278,8 +280,10 @@ void Burgers::PatchUpU()
             for (int J=1;J<py;J++)
             {
                 posj+=height_process_u[J-1];
+                cout << "Receiving from "<<(myrank+J*px)<<endl;
                 for (int j=0;j<height_process_u[J];j++)
                     MPI_Recv(&BigU[(posj+j)*Nx],Nx,MPI_DOUBLE,myrank+J*px,J,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                 cout << "Received from "<<(myrank+J*px)<<endl;
             }
             //from own widefield
             for (int j=0;j<local_ny;j++)
@@ -288,26 +292,20 @@ void Burgers::PatchUpU()
         }
         else
         {
+            cout << "my rank" << myrank <<" Sending to 0"<<endl;
+
             for (int j=0;j<local_ny;j++)
-            MPI_Send(&bigu[j*Nx],Nx,MPI_DOUBLE,myrank-mpirows,mpirows,MPI_COMM_WORLD);
+            MPI_Ssend(&bigu[j*Nx],Nx,MPI_DOUBLE,0,mpirows,MPI_COMM_WORLD);
         }
     }
-/*    if (myrank==0)
-    {
-        cout.precision(5);
-        for (int j=Ny-1;j>=0;j--){
-            for (int i=0;i<Nx;i++)
-                cout << fixed<<BigU[j*Nx+i]<<" ";
-            cout<<endl;
-        }
-    }*/
+cout << "my rank finshed patching U " << myrank << endl;
 }
+
 
 void Burgers::PatchUpV()
 {
     //Patching in the row
     if (mpicols==0)
-        
     {
         bigv=new double[Nx*local_ny];
         int pos=0;
@@ -362,51 +360,208 @@ void Burgers::PatchUpV()
         else
         {
             for (int j=0;j<local_ny;j++)
-            MPI_Send(&bigv[j*Nx],Nx,MPI_DOUBLE,myrank-mpirows,mpirows,MPI_COMM_WORLD);
+            MPI_Send(&bigv[j*Nx],Nx,MPI_DOUBLE,0,mpirows,MPI_COMM_WORLD);
         }
     }
-/*    if (myrank==0)
-    {
-        cout.precision(5);
-        for (int j=Ny-1;j>=0;j--){
-            for (int i=0;i<Nx;i++)
-                cout << fixed<<BigV[j*Nx+i]<<" ";
-            cout<<endl;
-        }
-    }*/
 }
+
+
 void Burgers::Print_velocity()
 {
+    if(myrank == 0) {
+        // Open file
+        ofstream f_out;
 
-    // Open file
-    ofstream f_out("velocity.txt");
-    if(!f_out.good()) {
-        cout << "Error: unable to open output file: sine.txt" << endl;
-    } else {
-        cout << "the U velocity field" << endl;
-        if(myrank == 0) {
-            cout.precision(5);
+        f_out.open("velocity.txt"); //,ios::trunc | ios::out);
+        if(!f_out.good()) {
+            cout << "Error: unable to open output file: sine.txt" << endl;
+        } else {
+            f_out << "the U velocity field" << endl;
+
+            f_out.precision(5);
             for(int j = Ny - 1; j >= 0; j--) {
                 for(int i = 0; i < Nx; i++)
-                    cout << fixed << BigU[j * Nx + i] << " ";
-                cout << endl;
+                    f_out << fixed << BigU[j * Nx + i] << " ";
+                f_out << endl;
             }
         }
-        cout << "the V velocity field" << endl;
+
+        f_out << "the V velocity field" << endl;
 
         if(myrank == 0) {
-            cout.precision(5);
+            f_out.precision(5);
             for(int j = Ny - 1; j >= 0; j--) {
                 for(int i = 0; i < Nx; i++)
-                    cout << fixed << BigV[j * Nx + i] << " ";
-                cout << endl;
+                    f_out << fixed << BigV[j * Nx + i] << " ";
+                f_out << endl;
             }
         }
+
+        f_out.close();
     }
+}
+
+// MPI references
+// int MPI_Recv(void *buf, int cnt, MPI_Datatype type, int src,int tag, MPI_Comm comm, MPI_Status *stat);
+// int MPI_Send(void *buf, int cnt, MPI_Datatype type, int dest, int tag, MPI_Comm comm);
+void Burgers::Communication()
+{
+    // sending inner right to outer left of prcess to the right of me 
+    cout << " I ENTERED COMMUNCATION()" << endl;
+    if(mpicols != 0) {
+        MPI_Recv(outer_left_u, local_ny, MPI_DOUBLE, myrank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // Sending left straight afterwards
+    }
+    if(mpicols != (px - 1)) {
+        MPI_Send(inner_right_u, local_ny, MPI_DOUBLE, myrank + 1, 0, MPI_COMM_WORLD);
+    }
+
+    // sending inner left to outer right of processs to the left of me
+    if(mpicols != (px - 1)) {
+        MPI_Recv(outer_right_u, local_ny, MPI_DOUBLE, myrank + 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+    // cout << " I FINIHSED THE RECIEVINBG BIT" << endl;
+    if(mpicols != 0) {
+        MPI_Send(inner_left_u, local_ny, MPI_DOUBLE, myrank - 1, 1, MPI_COMM_WORLD);
+    }
+
+    // seding inner upper to outer down of process above me
+    if(mpirows != 0) {
+        // cout << myrank << " Receiving from " << (myrank - px) << endl;
+        MPI_Recv(outer_down_u, local_nx, MPI_DOUBLE, myrank - px, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+    if(mpirows != (py - 1)) {
+        MPI_Send(inner_up_u, local_nx, MPI_DOUBLE, myrank + px, 2, MPI_COMM_WORLD);
+    }
+
+    // sending inner down u to outer upper down u of process below me
+    if(mpirows != (py - 1)) {
+        MPI_Recv(outer_up_u, local_nx, MPI_DOUBLE, myrank + px, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+    if(mpirows != 0) {
+        MPI_Send(inner_down_u, local_nx, MPI_DOUBLE, myrank - px, 2, MPI_COMM_WORLD);
+    }
+
+    
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+    // checking if it all works 
+    // cout << "hereherherheherhehre" << endl;
+    // for (int i=1; i<local_ny ;i++)
+    //{
+    //    cout<< "the outer left U is:" << endl;
+    //     cout<< outer_left_u[i] << endl;
+    //}
+  
+}
+
+void Burgers::Integrate_velocity()
+//{
+
+    
+
+
+    // auto* u_next = new double[Nx * Ny];
+    // auto* v_next = 0new double[Nx * Ny];
+ //   const double c1 = c / dx / dx + ax / dx;
+  //  const double c2 = c / dx / dx; 
+   // const double c3 = -2.0 * c * (1 / dx / dx + 1 / dy / dy) - ax / dx - ay / dy + 1 / dt;
+   // const double c4 = c / dy / dy + ay / dy;
+   // const double c5 = c / dy / dy;
+    //cout << "sup2 " << endl;
+// }    // first need to add a layer of padding around each process 
+
+
+    // dont forget about layer of padding all the way the outside of the big sqaure
+    
+
+/*//bottom left corner
+    if(mpicols==0 && mpirows==0){
+
+    }
+// top right corner    
+     if(mpicols==px && mpirows==py){
+
+    }
+// top left corner    
+     if(mpicols==0 && mpirows == py){
+
+    }
+// top left corner    
+     if(mpicols==px && mpirows == 0){
+    }   
+    
+// left rows
+    if(mpicols ==0 && mpirows !=0 && mpirows !=py){
+    }
+     
+//right rows
+    if(mpicols==px && mpirows !=0 && mpirows !=py){
+    }
+     
+// bottom rows
+    if(mpicols !=0 && mpicols != px && mpirows ==0){
+    }
+     
+// top rows
+    if (mpicols !=0 && mpicols != px && mpirows ==py){
+    }*/
+   
+    
+    
+    //MPI DATA TYPE METHOD 
+ /*   MPI_Datatype row;
+    MPI_Type_vector top_row(1, local_nx, local_nx, MPI_DOUBLE, &top_row)
+
+    MPI_Datatype col;
+    MPI_Type_vector right_col(local_ny, 1, local_nx, MPI_DOUBLE, &right_col)
+    
+    
+
+    MPI_Send(local_u, 1, top_col, int destination, int tag, MPI_Comm communicator)
+
+    MPI_Recv(void* data, local_nx, top_col, int source, int tag, MPI_Comm communicator, MPI_Status* status)*/
+
+
+/*        for(int i = 1; i < local_nx - 1; i++) {
+            for(int j = 1; j < local_ny - 1; j++) {
+                local_u_next = c1 * u[(i - 1) * local_ny + j] + c2 * u[(i + 1) * local_ny + j] + c3 * u[i * local_ny + j] + c4 * u[i * local_ny + j - 1] + c5 * u[i * local_ny + j + 1] +b / dx * u[i * local_ny + j] * (-u[i * local_ny + j] + u[(i - 1) * local_ny + j]) +  b / dy * v[i * local_ny + j] * (u[i * local_ny + j - 1] - u[i * local_ny + j]);
+                local_v_next = c1 * v[(i - 1) * local_ny + j] + c2 * v[(i + 1) * local_ny + j] + c3 * v[i * local_ny + j] +  c4 * v[i * local_ny + j - 1] + c5 * v[i * local_ny + j + 1] + b / dx * v[i * local_ny + j] * (-v[i * local_ny + j] + v[(i - 1) * local_ny + j]) +  b / dy * u[i * local_ny + j] * (v[i * local_ny + j - 1] - v[i * local_ny + j]);
+                //cout << "sup 3" << endl;
+                local_u_new[i * local_ny + j] = dt * local_u_next;
+                local_v_new[i * local_ny + j] = dt * local_v_next;
+            }
+        }*/
+        // Reassigning values to the velocity arrays
+/*        for(int in = 1; in < local_nx - 1; in++) {
+            for(int jn = 1; jn < local_ny - 1; jn++) {
+                local_u[in * local_ny + jn] = local_u_new[in * local_ny + jn];
+                local_v[in * local_ny + jn] = local_v_new[in * local_ny + jn];
+            }
+        }*/
+
+
+//writing velocity field to file
+
+
+
+void Burgers::Energy_Calculation()
+{
+    double energy;
+    for(int i = 0; i < Nx * Ny; i++) {
+        energy += (pow(u[i],2) + pow(v[i],2));
+    }
+    energy *= 0.5 * dx * dy;
+    cout << energy << endl;
 }
 
 
 
+
+// communicate first 
+// Get boundary of each small domain for each time step from the neighbouring processes
+// Time integrate boundaries and corners 
+// Time integrate inside 
 
 
 

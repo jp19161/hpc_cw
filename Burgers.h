@@ -16,6 +16,7 @@ public:
     void Integrate_velocity();
     void Print_velocity();
     void Energy_Calculation();
+    void Communication();
     void AssembleGrid();
     void PatchUpU();
     void PatchUpV();
@@ -82,6 +83,18 @@ private:
         double* bigv;
         double* BigU;
         double* BigV;
+
+        
+        // communication arrays    
+         double *outer_left_u;
+         double *outer_right_u;
+         double *outer_up_u;
+         double *outer_down_u;
+         double *inner_left_u;
+         double *inner_right_u;
+         double *inner_up_u;
+         double *inner_down_u;
+         
 };
 
 

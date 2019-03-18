@@ -17,6 +17,7 @@ public:
     void Print_velocity();
     void Energy_Calculation();
     void Communication();
+    void MakeBigger();
     void AssembleGrid();
     void PatchUpU();
     void PatchUpV();
@@ -67,6 +68,7 @@ private:
         int *height_process_v;
         int local_nx;
         int local_ny;
+        int medium_nx;
         int px;
         int py;
         int my_pos_x = 0;
@@ -95,6 +97,18 @@ private:
          double *inner_up_u;
          double *inner_down_u;
          
+         double *outer_left_v;
+         double *outer_right_v;
+         double *outer_up_v;
+         double *outer_down_v;
+         double *inner_left_v;
+         double *inner_right_v;
+         double *inner_up_v;
+         double *inner_down_v;
+         
+         double *medium_u;
+         double *medium_v;         
+
 };
 
 

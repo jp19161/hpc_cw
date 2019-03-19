@@ -43,10 +43,10 @@ int main(int argc, char* argv[])
 
  //   cout << "MADE BIGGER" << endl;
     // 
-
+MPI_Barrier(MPI_COMM_WORLD);
     b.Energy_Calculation();
 
-
+MPI_Barrier(MPI_COMM_WORLD);
 
     typedef std::chrono::high_resolution_clock hrc;
     typedef std::chrono::milliseconds ms;

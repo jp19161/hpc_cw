@@ -129,10 +129,7 @@ void Burgers::Initial_velocity()
     local_v = new double[local_nx * local_ny];
     local_x = new double[local_nx];
     local_y = new double[local_ny];
-    /*Left_B = new double
-    Right_B
-    Upper_B
-    Lower_B*/
+
 
     //    double r, rb;
     //    u = new double[Nx * Ny];
@@ -419,9 +416,9 @@ void Burgers::Integrate_velocity()
 //        cout << "c5/dt: " << c5 *dt << endl;
 //    cout << "-----------------------------------------------------------------------------------------------------------" << endl;
     
-
-    while(t <(T))   {
-        t+=dt;
+int timestep =0;
+    while(timestep<(Nt))   {
+       
         for(int i = 0; i < local_nx+2; i++) {
             for(int j = 0; j < local_ny+2; j++) {
                 medium_u[j * medium_nx + i] = 0;
@@ -489,8 +486,7 @@ void Burgers::Integrate_velocity()
         }
 //        
         for(int row = 0; row < local_ny; row++) {
-            inner_left_u[row] =
-            local_u[row * local_nx]; // first element of the top is local u [local_ny*local_nx-local_nx]
+            inner_left_u[row] = local_u[row * local_nx]; // first element of the top is local u [local_ny*local_nx-local_nx]
             inner_left_v[row] = local_v[row * local_nx];
             inner_right_u[row] = local_u[row * local_nx + local_nx - 1];
             inner_right_v[row] = local_v[row * local_nx + local_nx - 1];
@@ -508,8 +504,8 @@ void Burgers::Integrate_velocity()
 //         MPI_Barrier(MPI_COMM_WORLD);
 ////        MPI_Barrier(MPI_COMM_WORLD);
 ////        if (myrank==0){
-        cout <<"time step is:   "<< t <<endl;
-      t+=dt;
+        cout <<"time step is:   "<< timestep <<endl;
+      timestep++;
 ////        cout<<"Dt after"<<dt<<endl;
 ////        }
 //
@@ -849,12 +845,6 @@ void Burgers::PatchUpV()
     }
 }
 
-//void Burgers::Energy_Calculation(){
-//    double energy = 0.0;
-//    
-//    if(myrank == 0){
-//    for (int = 0; )
-//}
 
 void Burgers::Print_velocity()
 {

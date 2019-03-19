@@ -3,9 +3,8 @@ using namespace  std;
 
 void Model::ParseParameters(int argc, char* argv[])
 {
-    // Get rank of process 
+    // Get rank of process
 
-    
     if(argc != 12) {
         cout << " Please refer to the *HELP* section below" << endl;
         DispHelp();
@@ -36,8 +35,6 @@ void Model::PrintParameters()
     cout << "T:" << T << endl;
     cout << "px:" << px << endl;
     cout << "py:" << py << endl;
-
-    // print properly
 }
 
 void Model::DispHelp()
@@ -56,35 +53,36 @@ void Model::DispHelp()
     cout << " Ny = Number of y points" << endl;
     cout << " Nt = Number of time points" << endl;
     cout << " T = time" << endl;
+    cout << "px  = number of processes in x direction " << endl;
+    cout << "py  = number of processes in y direction " << endl;
 }
 
 void Model::IsValid(int argc, char* argv[])
 {
     regex integer("(\\+|-)?[[:digit:]]+");
     // As long as the input is correct ask for another number
-   // for(int i = 0; i < 3; i++) {
-        if(!regex_match(argv[6], integer)) {
-            cout << "Nx must be an integer" << endl;
-            exit(EXIT_FAILURE); 
-        }
-                if(!regex_match(argv[7], integer)) {
-            cout << "Ny must be an integer" << endl;
-            exit(EXIT_FAILURE); 
-        }
-                if(!regex_match(argv[8], integer)) {
-            cout << "Nt must be an integer" << endl;
-            exit(EXIT_FAILURE); 
-        }
-                if(!regex_match(argv[10], integer)) {
-            cout << "px must be an integer" << endl;
-            exit(EXIT_FAILURE); 
-        }
-                if(!regex_match(argv[11], integer)) {
-            cout << "py must be an integer" << endl;
-            exit(EXIT_FAILURE); 
-        }
-        
-   // }
+    // for(int i = 0; i < 3; i++) {
+    if(!regex_match(argv[6], integer)) {
+        cout << "Nx must be an integer" << endl;
+        exit(EXIT_FAILURE);
+    }
+    if(!regex_match(argv[7], integer)) {
+        cout << "Ny must be an integer" << endl;
+        exit(EXIT_FAILURE);
+    }
+    if(!regex_match(argv[8], integer)) {
+        cout << "Nt must be an integer" << endl;
+        exit(EXIT_FAILURE);
+    }
+    if(!regex_match(argv[10], integer)) {
+        cout << "px must be an integer" << endl;
+        exit(EXIT_FAILURE);
+    }
+    if(!regex_match(argv[11], integer)) {
+        cout << "py must be an integer" << endl;
+        exit(EXIT_FAILURE);
+    }
+
 }
 
 void Model::FillInput()
@@ -96,13 +94,10 @@ void Model::FillInput()
 
 Model::Model(int argc, char* argv[])
 {
-    // Reading the parameters
-    //cout<<"Creating mode"<<endl;
+   
     ParseParameters(argc, argv);
-    //cout<<"Parsed parameters"<<endl;
     FillInput();
-    //cout<<"Filled"<<endl;
-    // ValidateParameters()
+
     for(int i = 0; i < argc; i++) {
         if(string(argv[i]) == "-h") {
             DispHelp();

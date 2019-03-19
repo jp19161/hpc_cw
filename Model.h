@@ -9,8 +9,8 @@ using namespace std;
 
 class Model {
 	public:
-            Model(int argc, char* argv[]);
-            ~Model(){};
+        Model(int argc, char* argv[]);
+        ~Model(){};
         // Getters
         bool IsVerbose() const{ return verbose; }
         bool   IsHelp()    const { return help; }

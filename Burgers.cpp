@@ -113,15 +113,15 @@ void Burgers::Initial_velocity()
     }
 
     // checking everything has been definined correctly
-    cout << "rank: " << myrank << endl;
-
-    cout << "local nx: " << local_nx << endl;
-
-    cout << "local ny: " << local_ny << endl;
-
-    cout << "my x position: " << my_pos_x << endl;
-
-    cout << "my y position: " << my_pos_y << endl;
+//    cout << "rank: " << myrank << endl;
+//
+//    cout << "local nx: " << local_nx << endl;
+//
+//    cout << "local ny: " << local_ny << endl;
+//
+//    cout << "my x position: " << my_pos_x << endl;
+//
+//    cout << "my y position: " << my_pos_y << endl;
 
     // Actually doing the MPI stuff hah
     double r, rb;
@@ -153,8 +153,8 @@ void Burgers::Initial_velocity()
             r = sqrt(pow(local_x[col], 2) + pow(local_y[row], 2));
             if(r <= 1) {
                 rb = 2 * pow(1 - r, 4) * (4 * r + 1);
-                cout << "my rank:" << myrank << " global i " << (col + my_pos_x) << " global j " << (my_pos_y + row)
-                     << endl;
+               // cout << "my rank:" << myrank << " global i " << (col + my_pos_x) << " global j " << (my_pos_y + row)
+                     //<< endl;
             } else {
                 rb = 0.0;
             }
@@ -190,12 +190,16 @@ void Burgers::Initial_velocity()
     }
     // different loop for top bottom
     for(int col = 0; col < local_nx; col++) {
-        inner_up_u[col] = local_u[col * local_ny]; // first element of the top is local u [local_ny*local_nx-local_nx]
-        inner_up_v[col] = local_v[col * local_ny];
-        inner_down_u[col] = local_u[0];
-        inner_down_v[col] = local_v[0];
+        inner_up_u[col] = local_u[col +local_nx*(local_ny-1)]; // first element of the top is local u [local_ny*local_nx-local_nx]
+        inner_up_v[col] = local_v[col +local_nx*(local_ny-1)];
+        inner_down_u[col] = local_u[col];
+        inner_down_v[col] = local_v[col];
         // do v
     }
+//    if (myrank==3)
+//        for(int col = 0; col < local_nx; col++)
+//            cout<<inner_down_u[col]<<" ";
+//        cout<<endl;
 
     MPI_Barrier(MPI_COMM_WORLD);
     //    if (myrank==2)
@@ -243,24 +247,37 @@ double full_grid_y;
 void Burgers::Communication()
 {
     // sending inner right to outer left of prcess to the right of me
-    cout << " I ENTERED COMMUNCATION()" << endl;
+    // cout << " I ENTERED COMMUNCATION()" << endl;
+    MPI_Barrier(MPI_COMM_WORLD);
     if(mpicols != 0) {
         MPI_Recv(outer_left_u, local_ny, MPI_DOUBLE, myrank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Recv(outer_left_v, local_ny, MPI_DOUBLE, myrank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
+//        cout << " my rank is: " << myrank << " and i am receiving from: " << myrank - 1 << endl;
+//        if (myrank==1)
+//        for(int i = local_ny-1; i>=0; i--) {
+//            cout << outer_left_u[i] << endl;
+//        }
+//        cout << endl; 
+//        cout << endl;
         // Sending left straight afterwards
     }
     if(mpicols != (px - 1)) {
         MPI_Send(inner_right_u, local_ny, MPI_DOUBLE, myrank + 1, 0, MPI_COMM_WORLD);
         MPI_Send(inner_right_v, local_ny, MPI_DOUBLE, myrank + 1, 0, MPI_COMM_WORLD);
     }
-
+    MPI_Barrier(MPI_COMM_WORLD);
     // sending inner left to outer right of processs to the left of me
     if(mpicols != (px - 1)) {
         MPI_Recv(outer_right_u, local_ny, MPI_DOUBLE, myrank + 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Recv(outer_right_v, local_ny, MPI_DOUBLE, myrank + 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+//       cout << " my rank is: " << myrank << " and i am receiving from: " << myrank + 1 << endl;
+//       for(int i = 0; i < local_ny; i++) {
+//           cout << outer_right_u[i] << endl;
+//       } 
+//       cout << endl;
+//       cout << endl;
     }
-    // cout << " I FINIHSED THE RECIEVINBG BIT" << endl;
+    //cout << " I FINIHSED THE RECIEVINBG BIT" << endl;
     if(mpicols != 0) {
         MPI_Send(inner_left_u, local_ny, MPI_DOUBLE, myrank - 1, 1, MPI_COMM_WORLD);
         MPI_Send(inner_left_v, local_ny, MPI_DOUBLE, myrank - 1, 1, MPI_COMM_WORLD);
@@ -270,61 +287,94 @@ void Burgers::Communication()
     if(mpirows != 0) {
         MPI_Recv(outer_down_u, local_nx, MPI_DOUBLE, myrank - px, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Recv(outer_down_v, local_nx, MPI_DOUBLE, myrank - px, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+//        cout << " my rank is: " << myrank << " and i am receiving from: " << myrank - px << endl;
+//        for(int i = 0; i < local_nx; i++) {
+//            cout << outer_down_u[i] << " ";
+//        }
+//        cout << endl;
     }
+   // MPI_Barrier(MPI_COMM_WORLD);
     if(mpirows != (py - 1)) {
-        MPI_Send(inner_up_u, local_nx, MPI_DOUBLE, myrank + px, 2, MPI_COMM_WORLD);
-        MPI_Send(inner_up_v, local_nx, MPI_DOUBLE, myrank + px, 2, MPI_COMM_WORLD);
+        MPI_Ssend(inner_up_u, local_nx, MPI_DOUBLE, myrank + px, 2, MPI_COMM_WORLD);
+        MPI_Ssend(inner_up_v, local_nx, MPI_DOUBLE, myrank + px, 2, MPI_COMM_WORLD);
+        //cout << " my rank is: " << myrank << " and i am sendin to: " << myrank + px << endl;
+//        for(int i = 0; i < local_nx; i++) {
+//            cout << inner_up_u[i] << " ";
+//        }
+//        cout << endl;
     }
 
-    // sending inner down u to outer upper down u of process below me
-    if(mpirows != (py - 1)) {
-        cout << myrank << " Receiving from " << (myrank + px) << endl;
+         // sending inner down u to outer upper down u of process below me
+        if(mpirows != (py - 1)) {
+            MPI_Recv(outer_up_u, local_nx, MPI_DOUBLE, myrank + px, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(outer_up_v, local_nx, MPI_DOUBLE, myrank + px, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+//            cout << " my rank is: " << myrank << " and i am receiving from: " << myrank + px << endl;
+//            for(int i = 0; i < local_ny; i++) {
+//                cout << outer_up_u[i] << " ";
+ //           }
+        }
 
-        MPI_Recv(outer_up_u, local_nx, MPI_DOUBLE, myrank + px, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        MPI_Recv(outer_up_v, local_nx, MPI_DOUBLE, myrank + px, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    }
-    if(mpirows != 0) {
-        MPI_Send(inner_down_u, local_nx, MPI_DOUBLE, myrank - px, 2, MPI_COMM_WORLD);
-        MPI_Send(inner_down_v, local_nx, MPI_DOUBLE, myrank - px, 2, MPI_COMM_WORLD);
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
+        if(mpirows != 0) {
+          //  cout << myrank << " RECIEVING from " << (myrank - px) << endl;
+            MPI_Ssend(inner_down_u, local_nx, MPI_DOUBLE, myrank - px, 2, MPI_COMM_WORLD);
+            MPI_Ssend(inner_down_v, local_nx, MPI_DOUBLE, myrank - px, 2, MPI_COMM_WORLD);
 
-    // checking if it all works
-    // cout << "hereherherheherhehre" << endl;
-    // for (int i=1; i<local_ny ;i++)
-    //{
-    //    cout<< "the outer left U is:" << endl;
-    //     cout<< outer_left_u[i] << endl;
-    //}
-    cout << "LEAVING COMMS" << endl;
-}
+            }
+            
+            MPI_Barrier(MPI_COMM_WORLD);
+//             if (myrank==2)
+//        for(int i = 0;i<local_nx;i++) {
+//            cout << outer_down_u[i] << "  ";
+//       }
+//        cout<<endl;
+            MPI_Barrier(MPI_COMM_WORLD);
+
+            // checking if it all works
+            // cout << "hereherherheherhehre" << endl;
+            // for (int i=1; i<local_ny ;i++)
+            //{
+            //    cout<< "the outer left U is:" << endl;
+            //     cout<< outer_left_u[i] << endl;
+            //}
+            // cout << "LEAVING COMMS" << endl;
+        }
+    
+
 
 void Burgers::MakeBigger()
 {
 
     MPI_Barrier(MPI_COMM_WORLD);
-    cout << myrank << "is finished 1" << endl;
+   // cout << myrank << "is finished 1" << endl;
     for(int j = 1; j <= local_ny; j++)
         for(int i = 1; i <= local_nx; i++) {
             medium_u[j * (local_nx + 2) + i] = local_u[(j - 1) * local_nx + (i - 1)];
             medium_v[j * (local_nx + 2) + i] = local_v[(j - 1) * local_nx + (i - 1)];
         }
 
-    cout << myrank << "is finished 2" << endl;
+   // cout << myrank << "is finished 2" << endl;
     for(int i = 1; i <= local_ny; i++) {
         medium_u[i * (local_nx + 2)] = outer_left_u[i - 1];
         medium_u[i * (local_nx + 2) + local_nx + 1] = outer_right_u[i - 1];
         medium_v[i * (local_nx + 2)] = outer_left_v[i - 1];
         medium_v[i * (local_nx + 2) + local_nx + 1] = outer_right_v[i - 1];
     }
-    cout << myrank << "is finished 3" << endl;
+   // cout << myrank << "is finished 3" << endl;
     for(int i = 1; i <= local_nx; i++) {
         medium_u[i] = outer_down_u[i - 1];
-        medium_u[local_ny * (local_nx + 2) + local_nx + i] = outer_up_u[i - 1];
+        medium_u[local_ny * (local_nx + 2) + local_nx +2+ i] = outer_up_u[i - 1];
         medium_v[i] = outer_down_v[i - 1];
-        medium_v[local_ny * (local_nx + 2) + local_nx + i] = outer_up_v[i - 1];
+        medium_v[local_ny * (local_nx + 2) + local_nx +2+ i] = outer_up_v[i - 1];
     }
-    cout << myrank << "is finished 4" << endl;
+    //cout << myrank << "is finished 4" << endl;
+    MPI_Barrier(MPI_COMM_WORLD);
+//    if (myrank==1)
+//        for (int j=local_ny+1;j>=0;j--)
+//        {
+//            for (int i=0;i<medium_nx;i++)
+//                cout<<" "<<medium_u[j * medium_nx + i];
+//                cout<<endl;
+//        }
     MPI_Barrier(MPI_COMM_WORLD);
 }
 
@@ -332,22 +382,87 @@ void Burgers::Integrate_velocity()
 {
     medium_u = new double[(local_nx + 2) * (local_ny + 2)];
     medium_v = new double[(local_nx + 2) * (local_ny + 2)];
+ medium_nx = local_nx + 2;
+ for (int i=0; i<local_ny; i++){
+    outer_left_u[i] =0;
+    outer_right_u[i]=0;
+    outer_left_v[i]=0;
+    outer_right_v[i]=0;
+ }
+  for (int i=0; i<local_nx; i++){
+    outer_up_v[i]=0;
+    outer_down_v[i]=0;
+    outer_up_u[i]=0;
+    outer_down_u[i]=0;
+    }
+    
     //    //ORDER
     //    // 1. set outer boundaries that arent involved in integration
     //    // 2. communication boundaries between processes
     //    // 3. Integrate for 1 time steps
     //    // 4. communcate
     //    // 5. repeat for all time steps.
-    while(dt < T)   {
-        MakeBigger();
-        Communication();
-        const double c1 = -2.0 * c * (1 / dx / dx + 1 / dy / dy) - ax / dx - ay / dy + 1 / dt;
+    
+            const double c1 = -2.0 * c * (1 / dx / dx + 1 / dy / dy) - ax / dx - ay / dy + 1 / dt;
         const double c2 = c / dx / dx;
         const double c3 = c / dy / dy;
         const double c4 = c / dx / dx + ax / dx;
         const double c5 = c / dy / dy + ay / dy;
-        medium_nx = local_nx + 2;
-        
+    double t=0;
+//        cout << "-----------------------------------------------------------------------------------------------------------" << endl;
+//    cout << "dt: " << dt << endl;
+//    cout << "Nt: " << Nt << endl;
+//        cout << "c1/dt: " << c1*dt  << endl;
+//    cout << "c2/dt: " << c2 * dt<< endl;
+//        cout << "c3/dt: " << c3 *dt << endl;
+//    cout << "c4/dt: " << c4 *dt  << endl;
+//        cout << "c5/dt: " << c5 *dt << endl;
+//    cout << "-----------------------------------------------------------------------------------------------------------" << endl;
+    
+
+    while(t <(T))   {
+        t+=dt;
+        for(int i = 0; i < local_nx+2; i++) {
+            for(int j = 0; j < local_ny+2; j++) {
+                medium_u[j * medium_nx + i] = 0;
+                medium_v[j * medium_nx + i] = 0;
+            }
+        }
+//        if (myrank==1)
+//        for (int j=local_ny+1;j>=0;j--)
+//        {
+//            for (int i=0;i<medium_nx;i++)
+//                cout<<" "<<medium_u[j * medium_nx + i];
+//                cout<<endl;
+//        }
+        MPI_Barrier(MPI_COMM_WORLD);
+        Communication();
+        MPI_Barrier(MPI_COMM_WORLD);
+        MakeBigger();
+      //  cout<<"got here "<<myrank<<endl;
+//        
+//        cout<<"got here2 "<<myrank<<endl;
+//        if (myrank==1)
+//        for (int j=local_ny+1;j>=0;j--)
+//        {
+//            for (int i=0;i<medium_nx;i++)
+//                cout<<" "<<medium_u[j * medium_nx + i];
+//                cout<<endl;
+//        }
+//        cout<<"Feeling fine"<<endl;
+         MPI_Barrier(MPI_COMM_WORLD);
+//        if(myrank == 3) {
+//        for(int j =  local_ny + 1; j>=0 ; j--) {
+//            for(int i = 0; i < local_nx+2; i++) {
+//                cout << medium_u[j * (local_nx+2) + i]  << " ";
+//                
+//            }
+//            cout << endl;
+//        }
+//    }
+
+//        
+//        
         for(int i = 1; i < (local_nx + 1); i++) {
             for(int j = 1; j < (local_ny + 1); j++) {
                 local_u[(j - 1) * local_nx + i - 1] =
@@ -359,7 +474,8 @@ void Burgers::Integrate_velocity()
                              (b / dx) * medium_u[j * medium_nx + i] * medium_u[j * medium_nx + (i - 1)] +
                              c5 * medium_u[(j - 1) * medium_nx + i] +
                              (b / dy) * medium_v[j * medium_nx + i] * medium_u[(j - 1) * medium_nx + i]);
-
+                             
+//
                 local_v[(j - 1) * local_nx + i - 1] =
                     dt * (c1 * medium_v[j * medium_nx + i] -
                              (b / dy) * medium_u[j * medium_nx + i] * medium_v[j * medium_nx + i] -
@@ -371,7 +487,7 @@ void Burgers::Integrate_velocity()
                              (b / dy) * medium_u[j * medium_nx + i] * medium_v[(j - 1) * medium_nx + i]);
             }
         }
-
+//        
         for(int row = 0; row < local_ny; row++) {
             inner_left_u[row] =
             local_u[row * local_nx]; // first element of the top is local u [local_ny*local_nx-local_nx]
@@ -379,22 +495,134 @@ void Burgers::Integrate_velocity()
             inner_right_u[row] = local_u[row * local_nx + local_nx - 1];
             inner_right_v[row] = local_v[row * local_nx + local_nx - 1];
         }
-        // different loop for top bottom
+//        // different loop for top bottom
         for(int col = 0; col < local_nx; col++) {
             inner_up_u[col] =
-            local_u[col * local_ny]; // first element of the top is local u [local_ny*local_nx-local_nx]
-            inner_up_v[col] = local_v[col * local_ny];
-            inner_down_u[col] = local_u[0];
-            inner_down_v[col] = local_v[0];
+            local_u[col +local_nx*(local_ny-1)]; // first element of the top is local u [local_ny*local_nx-local_nx]
+            inner_up_v[col] = local_v[col +local_nx*(local_ny-1)];
+            inner_down_u[col] = local_u[col];
+            inner_down_v[col] = local_v[col];
         }
-        dt++;
-    }
+//        MPI_Barrier(MPI_COMM_WORLD);
+//cout<<"Feeling fin here as wele"<<endl;
+//         MPI_Barrier(MPI_COMM_WORLD);
+////        MPI_Barrier(MPI_COMM_WORLD);
+////        if (myrank==0){
+        cout <<"time step is:   "<< t <<endl;
+      t+=dt;
+////        cout<<"Dt after"<<dt<<endl;
+////        }
+//
+//cout << " the  medium u velocity" << endl;
+//if (myrank == 3){
+//    cout << "my rank is :" << myrank << endl;
+//for(int j =  local_ny + 1; j>=0 ; j--) {
+//            for(int i = 0; i < local_nx+2; i++) {
+//                cout << medium_u[j * (local_nx+2) + i]  << " ";
+//                
+//            }
+//            cout << endl;
+// }
+        }
+
+
+
+
+
+
+//
+//MPI_Barrier(MPI_COMM_WORLD);
+//
+//cout << " the  local u velocity for rank 3" << endl;
+//if (myrank == 3){
+//    cout << "my rank is :" << myrank << endl;
+//for(int j =  local_ny -1; j>=0 ; j--) {
+//            for(int i = 0; i < local_nx; i++) {
+//                cout << local_u[j * (local_nx) + i]  << " ";
+//                
+//            }
+//            cout << endl;
+//        }
+//}
+//MPI_Barrier(MPI_COMM_WORLD);
+//cout << " the  local u velocity for rank 0" << endl;
+//if (myrank == 0){
+//    cout << "my rank is :" << myrank << endl;
+//for(int j =  local_ny -1; j>=0 ; j--) {
+//            for(int i = 0; i < local_nx; i++) {
+//                cout << local_u[j * (local_nx) + i]  << " ";
+//                
+//            }
+//            cout << endl;
+//        }
+//}
+}
+//}
+//MPI_Barrier(MPI_COMM_WORLD);
+//if (myrank == 1){
+//    cout << "my rank is :" << myrank << endl;
+//for(int j =  local_ny + 1; j>=0 ; j--) {
+//            for(int i = 0; i < local_nx+2; i++) {
+//                cout << local_u[j * (local_nx+2) + i]  << " ";
+//                
+//            }
+//            cout << endl;
+//        }
+//}
+//MPI_Barrier(MPI_COMM_WORLD);
+//
+//if (myrank == 2){
+//    cout << "my rank is :" << myrank << endl;
+//for(int j =  local_ny + 1; j>=0 ; j--) {
+//            for(int i = 0; i < local_nx+2; i++) {
+//                cout << local_u[j * (local_nx+2) + i]  << " ";
+//                
+//            }
+//            cout << endl;
+//        }
+//}
+//MPI_Barrier(MPI_COMM_WORLD);
+//
+//if (myrank == 3){
+//    cout << "my rank is :" << myrank << endl;
+//for(int j =  local_ny + 1; j>=0 ; j--) {
+//            for(int i = 0; i < local_nx+2; i++) {
+//                cout << local_u[j * (local_nx+2) + i]  << " ";
+//                
+//            }
+//            cout << endl;
+//        }
+//}
+
+
+
+    
+//     for(int i = 1; i < local_nx - 1; i++) {
+//            for(int j = 1; j < local_ny - 1; j++) {
+//                local_u_next = c1 * u[(i - 1) * local_ny + j] + c2 * u[(i + 1) * local_ny + j] + c3 * u[i * local_ny +
+//   j] + c4 * u[i * local_ny + j - 1] + c5 * u[i * local_ny + j + 1] +b / dx * u[i * local_ny + j] * (-u[i * local_ny +
+//   j] + u[(i - 1) * local_ny + j]) +  b / dy * v[i * local_ny + j] * (u[i * local_ny + j - 1] - u[i * local_ny + j]);
+//                local_v_next = c1 * v[(i - 1) * local_ny + j] + c2 * v[(i + 1) * local_ny + j] + c3 * v[i * local_ny +
+//   j] +  c4 * v[i * local_ny + j - 1] + c5 * v[i * local_ny + j + 1] + b / dx * v[i * local_ny + j] * (-v[i * local_ny +
+//   j] + v[(i - 1) * local_ny + j]) +  b / dy * u[i * local_ny + j] * (v[i * local_ny + j - 1] - v[i * local_ny + j]);
+//                //cout << "sup 3" << endl;
+//                local_u_new[i * local_ny + j] = dt * local_u_next;
+//                local_v_new[i * local_ny + j] = dt * local_v_next;
+//            }
+//        }*/
+// Reassigning values to the velocity arrays
+/*        for(int in = 1; in < local_nx - 1; in++) {
+            for(int jn = 1; jn < local_ny - 1; jn++) {
+                local_u[in * local_ny + jn] = local_u_new[in * local_ny + jn];
+                local_v[in * local_ny + jn] = local_v_new[in * local_ny + jn];
+            }
+        }*/
     //    if(myrank == 1)
     //        for(int j = (local_ny + 1); j >= 0; j--) {
     //            for(int i = 0; i < (local_nx + 2); i++)
     //                cout << setw(8) << fixed << medium_u[j * (local_nx + 2) + i];
     //            cout << endl;
-}
+
 
 //                local_u_next = c1 * local_u[(i - 1) * local_ny + j] + c2 * local_u[(i + 1) * local_ny + j] + c3 *
 //                local_u[i * local_ny + j] + c4 * local_u[i * local_ny + j - 1] + c5 * local_u[i * local_ny + j + 1] +b
@@ -478,15 +706,19 @@ void Burgers::Integrate_velocity()
             }
         }*/
 
-// void Burgers::Energy_Calculation()
-//{
-//    double energy;
-//    for(int i = 0; i < Nx * Ny; i++) {
-//        energy += (pow(u[i],2) + pow(v[i],2));
-//    }
-//    energy *= 0.5 * dx * dy;
-//    cout << energy << endl;
-//}
+ void Burgers::Energy_Calculation()
+{
+    
+    if (myrank ==0){
+        cout << "did i get here" << endl; 
+    double energy = 0.0;
+    for(int i = 0; i < Nx * Ny; i++) {
+        energy += BigU[i]*BigU[i] + BigV[i]*BigV[i];
+    }
+    energy *= 0.5 * dx * dy;
+    cout << "the energy is: " << energy << endl;
+    }
+}
 
 // Model m(argc, argv);
 // Burgers b(&m);
@@ -507,10 +739,12 @@ void Burgers::Integrate_velocity()
 {
     // Patching in the row
     if(mpicols == 0) {
-        bigu = new double[Nx * local_ny];
+        cout << "my rank" << myrank << "entered merging" << endl;
+        bigu = new double[Nx * local_ny+5];
         int pos = 0;
         //        bigu = new double [sizeu*local_ny];
         int posnow;
+         cout << "my rank" << myrank << "Started merging" << endl;
         // from other in the same row
         for(int i = 1; i < px; i++) {
             int recv_size = width_process_u[i];
@@ -529,9 +763,10 @@ void Burgers::Integrate_velocity()
         }
     } else {
         for(int j = 0; j < local_ny; j++)
-            MPI_Send(&local_u[j * local_nx], local_nx, MPI_DOUBLE, myrank - mpicols, mpicols, MPI_COMM_WORLD);
+            MPI_Ssend(&local_u[j * local_nx], local_nx, MPI_DOUBLE, myrank - mpicols, mpicols, MPI_COMM_WORLD);
     }
     cout << "my rank" << myrank << "Done column merging" << endl;
+    MPI_Barrier(MPI_COMM_WORLD);
     // Patching the wide field onto process 0
     if(mpicols == 0) {
         if(myrank == 0) {
@@ -541,24 +776,24 @@ void Burgers::Integrate_velocity()
             // from other in the 0 column
             for(int J = 1; J < py; J++) {
                 posj += height_process_u[J - 1];
-                cout << "Receiving from " << (myrank + J * px) << endl;
+                //cout << "Receiving from " << (myrank + J * px) << endl;
                 for(int j = 0; j < height_process_u[J]; j++)
                     MPI_Recv(
                         &BigU[(posj + j) * Nx], Nx, MPI_DOUBLE, myrank + J * px, J, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                cout << "Received from " << (myrank + J * px) << endl;
+                //cout << "Received from " << (myrank + J * px) << endl;
             }
             // from own widefield
             for(int j = 0; j < local_ny; j++)
                 for(int i = 0; i < Nx; i++)
                     BigU[j * Nx + i] = bigu[j * Nx + i];
         } else {
-            cout << "my rank" << myrank << " Sending to 0" << endl;
+            //cout << "my rank" << myrank << " Sending to 0" << endl;
 
             for(int j = 0; j < local_ny; j++)
                 MPI_Ssend(&bigu[j * Nx], Nx, MPI_DOUBLE, 0, mpirows, MPI_COMM_WORLD);
         }
     }
-    cout << "my rank finshed patching U " << myrank << endl;
+    //cout << "my rank finshed patching U " << myrank << endl;
 }
 
 void Burgers::PatchUpV()
@@ -614,6 +849,13 @@ void Burgers::PatchUpV()
     }
 }
 
+//void Burgers::Energy_Calculation(){
+//    double energy = 0.0;
+//    
+//    if(myrank == 0){
+//    for (int = 0; )
+//}
+
 void Burgers::Print_velocity()
 {
     if(myrank == 0) {
@@ -626,7 +868,7 @@ void Burgers::Print_velocity()
         } else {
             f_out << "the U velocity field" << endl;
 
-            f_out.precision(5);
+            f_out.precision(6);
             for(int j = Ny - 1; j >= 0; j--) {
                 for(int i = 0; i < Nx; i++)
                     f_out << fixed << BigU[j * Nx + i] << " ";
@@ -636,8 +878,8 @@ void Burgers::Print_velocity()
 
         f_out << "the V velocity field" << endl;
 
-        if(myrank == 0) {
-            f_out.precision(5);
+        if(myrank == 0) {   
+            f_out.precision(6);
             for(int j = Ny - 1; j >= 0; j--) {
                 for(int i = 0; i < Nx; i++)
                     f_out << fixed << BigV[j * Nx + i] << " ";

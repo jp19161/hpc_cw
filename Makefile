@@ -16,16 +16,16 @@ compile: main.o  Model.o Burgers.o
 	target 
 
 diff: compile
-	mpiexec -np 2 HPC_Prog 0 0 0 1 10.0 21 21 4000 1.0 2 1
+	mpiexec -np 4 HPC_Prog 0 0 0 1 10.0 21 21 4000 1.0 2 2  
 
 advx: compile
-	mpiexec -np 6 HPC_Prog 1 0 0 0 10.0 21 21 4000 1.0
+	mpiexec -np 4 HPC_Prog 1 0 0 0 10.0 21 21 4000 1.0 2 2 
 
 advy: compile
-	mpiexec -np 6 HPC_Prog 0 1 0 0 10.0 21 21 4000 1.0
+	mpiexec -np 4 HPC_Prog 0 1 0 0 10.0 21 21 4000 1.0 2 2 
 
 burg: compile
-	mpiexec -np 2 HPC_Prog 1.0 0.5 1.0 0.02 10.0 21 21 4000 1.0 2 1
+	mpiexec -np 16 HPC_Prog 1.0 0.5 1.0 0.02 10.0 21 21 4000 1.0 4 4
 
 clean:
 	-rm -f *.o HPC_Prog   # Clean up (and ignore any errors)

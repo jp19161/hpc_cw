@@ -18,29 +18,33 @@ int main(int argc, char* argv[])
     //cout<<"Created burgers"<<endl;
 
     b.Initial_velocity();
-    cout << "DONE INITIAL VELOCITY" << endl;
+    //cout << "DONE INITIAL VELOCITY" << endl;
     MPI_Barrier(MPI_COMM_WORLD);
 //    b.Communication();
 //    cout << "DONE COMMUNICATION" << endl;
 //    b.MakeBigger();
 //    cout << "DONE MAKE BIGGER" << endl;
     b.Integrate_velocity();
-    cout << "DONE INTEGRATE VELOCITY" << endl;
+//    MPI_Barrier(MPI_COMM_WORLD);
+//    cout << "DONE INTEGRATE VELOCITY" << endl;
+//    MPI_Barrier(MPI_COMM_WORLD);
     b.PatchUpU();
-    cout << " PATCHED UP U" << endl;
+  //  cout << " PATCHED UP U" << endl;
+//     MPI_Barrier(MPI_COMM_WORLD);
     b.PatchUpV();
-    cout << " PATCHED UP U" << endl;
-    b.Print_velocity();
-    cout << " PATCHED UP U" << endl;
+   //cout << " PATCHED UP V" << endl;
+//     
+   b.Print_velocity();
+ //   cout << " I PRINTED VELOCITY" << endl;
 
     // cout << "i printed velocity" << endl;
 
-    cout << "COMMUNICATION FINISHED" << endl;
+ //   cout << "COMMUNICATION FINISHED" << endl;
 
-    cout << "MADE BIGGER" << endl;
+ //   cout << "MADE BIGGER" << endl;
     // 
 
-//    b.Energy_Calculation();
+    b.Energy_Calculation();
 
 
 
@@ -50,13 +54,15 @@ int main(int argc, char* argv[])
     hrc::time_point end = hrc::now();
     auto diff = end - start;
     cout <<"\n\nexexution time: "<< chrono::duration <double, milli> (diff).count() << " ms" << endl;
-cout << "getting to the barrier" << endl;   
+//cout << "getting to the barrier" << endl;   
     //MPI_Barrier(MPI_COMM_WORLD);
-   cout<< "Passed the BARRIER" << endl;
- b.~Burgers();
+ //  cout<< "Passed the BARRIER" << endl;
+// b.~Burgers();
+// cout<< "Passed the destructor" << endl;
  MPI_Barrier(MPI_COMM_WORLD);
- cout << "DESTRUCTED" << endl;
+ //cout << "DESTRUCTED" << endl;
+  MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
-    cout<<"Finished"<<endl;
+   // cout<<"Finished"<<endl;
     return 0;
 }
